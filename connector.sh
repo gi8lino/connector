@@ -12,9 +12,12 @@ function ShowHelp {
            "If you do not want this feature on a specific container, add the label 'connector.enabled=False'." \
            "If more than one container is found, a list to select the correct container will be displayed." \
            "If a container was found or selected, it perform the command 'docker exec -it <PARAMETERS> <CONTAINER_NAME> <COMMAND>'." \
+           "If you do not want to set a label for each container to enable this feature, pass the argument '-a|--all'." \
+           "Container with the label 'connector.enabled=False' will be ignored." \
            "" \
            "parameters:" \
 	       "-j, --jq-path [PATH]    path to 'jq' if not in '\$PATH' or './jq-linux64' is not at script path (otional)" \
+           "-a, --all               Search thru all containers, except those with label 'connector.enabled=false'" \
            "-h, --help              display this help and exit" \
            "-v, --version           output version information and exit" \
            "" \
@@ -35,6 +38,11 @@ args="${#arr[@]}"
 while [[ $# -gt 0 ]];do
     key="$1"
     case $key in
+        -a|--all)
+        ALL=True
+        counter=$((counter+1))
+        shift # past argument
+        ;;        
         -j|--path-jq)
         JQ="$2"
         counter=$((counter+2))
@@ -86,9 +94,11 @@ for container in $(docker ps -a --format '{{.Names}}'); do
     [[ $container != *"$SEARCH"* ]] && continue
 
     read -r enabled command< <(echo $(docker inspect $container | ${JQ} -r '.[].Config.Labels | ."connector.enabled", ."connector.command"'))
-    # if enabled or enabled not set but commmand set
-    if [ "${enabled,,}" == "true" ] || [ -z "$enabled" ] && [ ! -z "$command" ] ; then
-        counter=$((counter+1))        
+
+    [ "${enabled,,}" != "true" ] && [ "${enabled,,}" != "null" ] && continue
+
+    if [ ! -z "$ALL" ] || [ ! -z "$command" ] ; then
+        counter=$((counter+1))
         [ -z "$command" ] || [ "$command" = "null" ] && command="/bin/bash"
         containers+=("$(printf "%-4s %-20s %-15s\n" $counter $container $command)")
     fi
