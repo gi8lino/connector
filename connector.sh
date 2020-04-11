@@ -27,7 +27,7 @@ function ShowHelp {
 shopt -s nocasematch  # set string compare to not case senstive
 
 # count start arguments
-counter=1
+counter=0
 read -ra arr <<< "$@"
 args="${#arr[@]}"
 
@@ -69,15 +69,14 @@ if [ ! -z "${JQ}" ]; then
 	    exit 1
     fi
 else
-    if [ ! -x "$(command -v jq)" ]; then
-        if [ -f "./jq-linux64" ]; then
-            JQ="./jq-linux64"
-        else
-	        echo -e "'jq' is not installed! please install 'jq' or download binary and add the path as start parameter (-j|--jq-path)"
-	        exit 1
-        fi
+    if [ -x "$(command -v jq)" ]; then
+        JQ="jq"
+    elif [ -f "./jq-linux64" ]; then
+        JQ="./jq-linux64"
+    else
+        echo -e "'jq' is not installed! please install 'jq' or download binary and add the path as start parameter (-j|--jq-path)"
+        exit 1
     fi
-    JQ="jq"
 fi
 
 # collect possible containers
@@ -86,8 +85,7 @@ counter=0
 for container in $(docker ps -a --format '{{.Names}}'); do
     [[ $container != *"$SEARCH"* ]] && continue
 
-    read -r enabled command< <(echo $(docker inspect $container | ${JQ} -r '.[].Config.Labels | ."connector.enable", ."connector.command"'))
-    
+    read -r enabled command< <(echo $(docker inspect $container | ${JQ} -r '.[].Config.Labels | ."connector.enabled", ."connector.command"'))
     # if enabled or enabled not set but commmand set
     if [ "${enabled,,}" == "true" ] || [ -z "$enabled" ] && [ ! -z "$command" ] ; then
         counter=$((counter+1))        
