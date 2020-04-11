@@ -23,7 +23,8 @@ function ShowHelp {
            "" \
            "All additional [PARAMETERS] will be passt to 'docker exec'!" \
            "" \
-           "created by gi8lino (2020)"
+           "created by gi8lino (2020)" \
+           "https://github.com/gi8lino/connector"
     exit 0
 }
 
