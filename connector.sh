@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=v1.0.0
+VERSION=v1.0.1
 
 function ShowHelp {
     printf "%s\n"  \
@@ -111,7 +111,7 @@ if [ "${#containers[@]}" = 0 ]; then
     exit 1
 elif [ "${#containers[@]}" = 1 ]; then  # only one container found
     num=0
-elif [ "${#containers[@]}" > 1 ]; then
+elif [ "${#containers[@]}" -gt 1 ]; then
     len=${#containers[@]}
     re='^[0-9]+$'
 
@@ -123,7 +123,7 @@ elif [ "${#containers[@]}" > 1 ]; then
 
         if [[ ! $num =~ $re ]] ; then  # response is not a number
             echo -e "\033[91minput must be a number!\033[0m\n\n"
-        elif (($num > $len)); then  # response number is bigger than possible max
+        elif (($num -gt $len)); then  # response number is bigger than possible max
             echo -e "\033[91minput number must be less than $len!\033[0m\n\n"
         elif [ $num = 0 ]; then  # response number is 0 and not possible
             echo -e "\033[91minput number cannot be 0!\033[0m\n\n"
