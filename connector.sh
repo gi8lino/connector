@@ -106,13 +106,13 @@ for container in $(docker ps -a --format '{{.Names}}'); do
 done
 
 # evaluate possible conntainers
-if [ "${#containers[@]}" = 0 ]; then
+len=${#containers[@]}
+if [ "$len" = 0 ]; then
     echo -e "\033[91mcontainer '$SEARCH' not found\033[0m"
     exit 1
-elif [ "${#containers[@]}" = 1 ]; then  # only one container found
+elif [ "$len" = 1 ]; then  # only one container found
     num=0
-elif [ "${#containers[@]}" -gt 1 ]; then
-    len=${#containers[@]}
+elif (("$len" > 1)); then
     re='^[0-9]+$'
 
     while true; do
@@ -123,7 +123,7 @@ elif [ "${#containers[@]}" -gt 1 ]; then
 
         if [[ ! $num =~ $re ]] ; then  # response is not a number
             echo -e "\033[91minput must be a number!\033[0m\n\n"
-        elif (($num -gt $len)); then  # response number is bigger than possible max
+        elif (($num > $len)); then  # response number is bigger than possible max
             echo -e "\033[91minput number must be less than $len!\033[0m\n\n"
         elif [ $num = 0 ]; then  # response number is 0 and not possible
             echo -e "\033[91minput number cannot be 0!\033[0m\n\n"
