@@ -1,30 +1,30 @@
 #!/bin/bash
 
-VERSION=v1.0.1
+VERSION=v1.0.2
 
 function ShowHelp {
-    printf "%s\n"  \
-           "Usage: connector.sh [PARAMETERS] [-j|--jq-path] [CONTAINER_NAME] | [-h|--help] | [-v|--version]" \
-           "" \
-           "Search a docker container and do a 'docker exec -it <PARAMETERS> <CONTAINER_NAME> <COMMAND>'." \
-           "The default command is '/bin/bash'. If 'bash' is not installed in a container, you can add the label" \
-           "'connector.command=<SPECIAL_COMMAND>'." \
-           "If you do not want this feature on a specific container, add the label 'connector.enabled=False'." \
-           "If more than one container is found, a list to select the correct container will be displayed." \
-           "If a container was found or selected, it perform the command 'docker exec -it <PARAMETERS> <CONTAINER_NAME> <COMMAND>'." \
-           "If you do not want to set a label for each container to enable this feature, pass the argument '-a|--all'." \
-           "Container with the label 'connector.enabled=False' will be ignored." \
-           "" \
-           "parameters:" \
-	       "-j, --jq-path [PATH]    path to 'jq' if not in '\$PATH' or './jq-linux64' is not at script path (otional)" \
-           "-a, --all               Search thru all containers, except those with label 'connector.enabled=false'" \
-           "-h, --help              display this help and exit" \
-           "-v, --version           output version information and exit" \
-           "" \
-           "All additional [PARAMETERS] will be passt to 'docker exec'!" \
-           "" \
-           "created by gi8lino (2020)" \
-           "https://github.com/gi8lino/connector"
+    printf "%
+Usage: connector.sh [PARAMETERS] [-j|--jq-path] [CONTAINER_NAME] | [-h|--help] | [-v|--version]
+
+Search a docker container and do a 'docker exec -it <PARAMETERS> <CONTAINER_NAME> <COMMAND>'.
+The default command is '/bin/bash'. If 'bash' is not installed in a container, you can add the label
+'connector.command=<SPECIAL_COMMAND>'.
+If you do not want this feature on a specific container, add the label 'connector.enabled=False'.
+If more than one container is found, a list to select the correct container will be displayed.
+If a container was found or selected, it perform the command 'docker exec -it <PARAMETERS> <CONTAINER_NAME> <COMMAND>'.
+If you do not want to set a label for each container to enable this feature, pass the argument '-a|--all'.
+Container with the label 'connector.enabled=False' will be ignored.
+
+parameters:
+-j, --jq-path [PATH]    path to 'jq' if not in '\$PATH' or './jq-linux64' is not at script path (otional)
+-a, --all               Search thru all containers, except those with label 'connector.enabled=false'
+-h, --help              display this help and exit
+-v, --version           output version information and exit
+
+All additional [PARAMETERS] will be passt to 'docker exec'!
+
+created by gi8lino (2020)
+https://github.com/gi8lino/connector\n\n"
     exit 0
 }
 
@@ -60,7 +60,7 @@ while [[ $# -gt 0 ]];do
         *)
         counter=$((counter+1))
 
-        if (($counter == $args)); then
+        if (($counter == $args));then
             SEARCH="$1"
         else
             PARAMS="${PARAMS}$1"
@@ -72,15 +72,15 @@ done
 
 containers=()
 
-if [ ! -z "${JQ}" ]; then
-    if [ ! -f "${JQ}" ]; then
+if [ ! -z "${JQ}" ];then
+    if [ ! -f "${JQ}" ];then
 	    echo -e "path to jq '${JQ}' does not exists"
 	    exit 1
     fi
 else
-    if [ -x "$(command -v jq)" ]; then
+    if [ -x "$(command -v jq)" ];then
         JQ="jq"
-    elif [ -f "./jq-linux64" ]; then
+    elif [ -f "./jq-linux64" ];then
         JQ="./jq-linux64"
     else
         echo -e "'jq' is not installed! please install 'jq' or download binary and add the path as start parameter (-j|--jq-path)"
@@ -98,7 +98,7 @@ for container in $(docker ps -a --format '{{.Names}}'); do
 
     [ "${enabled,,}" != "true" ] && [ "${enabled,,}" != "null" ] && continue
 
-    if [ ! -z "$ALL" ] || [ ! -z "$command" ] ; then
+    if [ ! -z "$ALL" ] || [ ! -z "$command" ] ;then
         counter=$((counter+1))
         [ -z "$command" ] || [ "$command" = "null" ] && command="/bin/bash"
         containers+=("$(printf "%-4s %-20s %-15s\n" $counter $container $command)")
@@ -107,12 +107,12 @@ done
 
 # evaluate possible conntainers
 len=${#containers[@]}
-if [ "$len" = 0 ]; then
+if [ "$len" = 0 ];then
     echo -e "\033[91mcontainer '$SEARCH' not found\033[0m"
     exit 1
-elif [ "$len" = 1 ]; then  # only one container found
+elif [ "$len" = 1 ];then  # only one container found
     num=0
-elif (("$len" > 1)); then
+elif (("$len" > 1));then
     re='^[0-9]+$'
 
     while true; do
@@ -121,16 +121,15 @@ elif (("$len" > 1)); then
         printf "\n"
         read -p 'select container to connect: ' num
 
-        if [[ ! $num =~ $re ]] ; then  # response is not a number
+        if [[ ! $num =~ $re ]];then  # response is not a number
             echo -e "\033[91minput must be a number!\033[0m\n\n"
-        elif (($num > $len)); then  # response number is bigger than possible max
+        elif (($num > $len));then  # response number is bigger than possible max
             echo -e "\033[91minput number must be less than $len!\033[0m\n\n"
-        elif [ $num = 0 ]; then  # response number is 0 and not possible
+        elif [ $num = 0 ];then  # response number is 0 and not possible
             echo -e "\033[91minput number cannot be 0!\033[0m\n\n"
         else  # response number is valid
             break
         fi
-
     done
 else
     printf "\033[91munknown error. exit\033[0m\n"
