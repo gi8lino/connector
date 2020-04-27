@@ -38,6 +38,7 @@ args="${#arr[@]}"
 # read start parameter
 while [[ $# -gt 0 ]];do
     key="$1"
+    counter=$((counter+1))
     case $key in
         -a|--all)
         ALL=True
@@ -58,8 +59,6 @@ while [[ $# -gt 0 ]];do
         ShowHelp
         ;;
         *)
-        counter=$((counter+1))
-
         if (($counter == $args));then
             SEARCH="$1"
         else
